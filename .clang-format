@@ -6,14 +6,14 @@ IndentWidth: 4
 TabWidth: 4
 UseTab: Never
 
-# Braces - matching your K&R style
-BreakBeforeBraces: Attach
+# Braces
+BreakBeforeBraces: Linux
 BraceWrapping:
   AfterCaseLabel: false
   AfterClass: false
   AfterControlStatement: Never
   AfterEnum: false
-  AfterFunction: false
+  AfterFunction: true
   AfterNamespace: false
   AfterStruct: false
   AfterUnion: false
@@ -22,7 +22,7 @@ BraceWrapping:
   IndentBraces: false
 
 # Spacing
-SpaceAfterCStyleCast: false
+SpaceAfterCStyleCast: true
 SpaceBeforeParens: ControlStatements
 SpaceBeforeAssignmentOperators: true
 SpaceBeforeRangeBasedForLoopColon: true
@@ -33,7 +33,7 @@ SpacesInParentheses: false
 SpacesInSquareBrackets: false
 
 # Line length
-ColumnLimit: 120
+ColumnLimit: 100
 
 # Alignment
 AlignConsecutiveAssignments: false
@@ -53,7 +53,7 @@ BreakBeforeTernaryOperators: true
 # Includes
 SortIncludes: false
 
-# Pointers and references - matching your style
+# Pointers and references
 PointerAlignment: Right
 DerivePointerAlignment: false
 
@@ -69,8 +69,3 @@ ReflowComments: true
 
 # Macros
 IndentPPDirectives: None
-
-# Additional settings to match your style
-AlwaysBreakAfterReturnType: None
-KeepEmptyLinesAtTheStartOfBlocks: false
-MaxEmptyLinesToKeep: 1
