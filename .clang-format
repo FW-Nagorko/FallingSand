@@ -1,0 +1,76 @@
+# Generated based on existing code style
+BasedOnStyle: LLVM
+
+# Indentation
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+
+# Braces - matching your K&R style
+BreakBeforeBraces: Attach
+BraceWrapping:
+  AfterCaseLabel: false
+  AfterClass: false
+  AfterControlStatement: Never
+  AfterEnum: false
+  AfterFunction: false
+  AfterNamespace: false
+  AfterStruct: false
+  AfterUnion: false
+  BeforeCatch: false
+  BeforeElse: false
+  IndentBraces: false
+
+# Spacing
+SpaceAfterCStyleCast: false
+SpaceBeforeParens: ControlStatements
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeRangeBasedForLoopColon: true
+SpaceInEmptyParentheses: false
+SpacesInAngles: false
+SpacesInCStyleCastParentheses: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+
+# Line length
+ColumnLimit: 120
+
+# Alignment
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AlignOperands: true
+AlignTrailingComments: false
+
+# Breaking
+AllowShortBlocksOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+BreakBeforeBinaryOperators: None
+BreakBeforeTernaryOperators: true
+
+# Includes
+SortIncludes: false
+
+# Pointers and references - matching your style
+PointerAlignment: Right
+DerivePointerAlignment: false
+
+# Case statements
+IndentCaseLabels: false
+
+# Function parameters
+BinPackParameters: true
+BinPackArguments: true
+
+# Comments
+ReflowComments: true
+
+# Macros
+IndentPPDirectives: None
+
+# Additional settings to match your style
+AlwaysBreakAfterReturnType: None
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 1

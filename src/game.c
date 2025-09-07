@@ -12,35 +12,34 @@ void init_game(GameState *game, int width, int height) {
 }
 
 void swap_buffers(GameState *game);
-void set_back_pixel(GameState *game, int x, int y, Material mat){
+void set_back_pixel(GameState *game, int x, int y, Material mat) {
     if (x >= 0 && x < game->width && y >= 0 && y < game->height) {
         game->back[y * game->width + x] = mat;
     }
 }
 
 void update_game(GameState *game) {
-    for(int y = 0; y < game->height; y++) {
-        for(int x = 0; x < game->width; x++) {
+    for (int y = 0; y < game->height; y++) {
+        for (int x = 0; x < game->width; x++) {
             Material mat = get_pixel(game, x, y);
-            switch (mat)
-            {
+            switch (mat) {
             case SAND:
-                if(get_pixel(game, x, y + 1) == EMPTY) {
+                if (get_pixel(game, x, y + 1) == EMPTY) {
                     set_back_pixel(game, x, y + 1, SAND);
-                } else if(get_pixel(game, x - 1, y + 1) == EMPTY) {
+                } else if (get_pixel(game, x - 1, y + 1) == EMPTY) {
                     set_back_pixel(game, x - 1, y + 1, SAND);
-                } else if(get_pixel(game, x + 1, y + 1) == EMPTY) {
+                } else if (get_pixel(game, x + 1, y + 1) == EMPTY) {
                     set_back_pixel(game, x + 1, y + 1, SAND);
                 } else {
                     set_back_pixel(game, x, y, SAND);
                 }
                 break;
             case WATER:
-                if(get_pixel(game, x, y + 1) == EMPTY) {
+                if (get_pixel(game, x, y + 1) == EMPTY) {
                     set_back_pixel(game, x, y + 1, WATER);
-                } else if(get_pixel(game, x - 1, y + 1) == EMPTY) {
+                } else if (get_pixel(game, x - 1, y + 1) == EMPTY) {
                     set_back_pixel(game, x - 1, y + 1, WATER);
-                } else if(get_pixel(game, x + 1, y + 1) == EMPTY) {
+                } else if (get_pixel(game, x + 1, y + 1) == EMPTY) {
                     set_back_pixel(game, x + 1, y + 1, WATER);
                 } else {
                     set_back_pixel(game, x, y, WATER);

@@ -1,13 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
 
-
-typedef enum {
-    EMPTY,
-    SAND,
-    WATER,
-    WALL
-} Material;
+typedef enum { EMPTY, SAND, WATER, WALL } Material;
 
 typedef struct {
     int width, height;

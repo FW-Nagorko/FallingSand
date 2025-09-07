@@ -64,8 +64,14 @@ endif()
 
 # Set debug/release configurations
 if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build" FORCE)
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build" FORCE)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+endif()
+
+# Debug-specific settings
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_options(FallingSand PRIVATE -g -O0)
+    target_compile_definitions(FallingSand PRIVATE DEBUG=1)
 endif()
 
 # Print build information
