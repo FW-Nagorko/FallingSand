@@ -1,39 +1,62 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.11)
 project(FallingSand LANGUAGES C)
 
 # Set C standard
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-# Create an option to switch between a system SDL library and a vendored SDL library
-option(FALLINGSAND_VENDORED "Use vendored SDL library" OFF)
+# FetchContent setup
+include(FetchContent)
+set(FETCHCONTENT_QUIET FALSE)
 
-if(FALLINGSAND_VENDORED)
-    # This assumes you have added SDL as a submodule in vendored/SDL
-    add_subdirectory(vendored/SDL EXCLUDE_FROM_ALL)
-else()
-    # Look for a SDL3 package, look for the SDL3-shared component, and fail if it cannot be found
-    find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3-shared)
-endif()
+# Download SDL3
+FetchContent_Declare(
+    SDL
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+    GIT_TAG release-3.2.4
+    GIT_SHALLOW TRUE
+    GIT_PROGRESS TRUE
+)
+message(STATUS "Fetching SDL3...")
+FetchContent_MakeAvailable(SDL)
+set_property(DIRECTORY "${sdl_SOURCE_DIR}" PROPERTY EXCLUDE_FROM_ALL TRUE)
+
+# Download SDL_ttf
+FetchContent_Declare(
+	SDL_ttf
+	GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git
+	GIT_TAG release-3.2.2
+	# GIT_SHALLOW FALSE
+	GIT_PROGRESS TRUE
+)
+message(STATUS "Using SDL_ttf via FetchContent")
+FetchContent_MakeAvailable(SDL_ttf)
+set_property(DIRECTORY "${sdl_ttf_SOURCE_DIR}" PROPERTY EXCLUDE_FROM_ALL TRUE)
 
 # Define source files
 set(SOURCES
-    src/main.c
     src/game.c
+    src/main.c
     src/rendering.c
+    src/ui.c
 )
 
 # Define header files (for IDE support)
 set(HEADERS
     src/game.h
     src/rendering.h
+    src/ui.h
+    vendor/clay/clay.h
 )
 
 # Create the executable
 add_executable(FallingSand ${SOURCES} ${HEADERS})
 
 # Link to the SDL3 library
-target_link_libraries(FallingSand PRIVATE SDL3::SDL3)
+target_link_libraries(FallingSand PRIVATE 
+    SDL3::SDL3
+    SDL3_ttf::SDL3_ttf
+)
 
 # Set target properties
 set_target_properties(FallingSand PROPERTIES
@@ -41,11 +64,11 @@ set_target_properties(FallingSand PROPERTIES
 )
 
 # For Windows, copy SDL3.dll to the output directory
-if(WIN32 AND TARGET SDL3::SDL3-shared)
+if(WIN32)
     add_custom_command(
         TARGET FallingSand POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        $<TARGET_FILE:SDL3::SDL3-shared>
+        $<TARGET_FILE:SDL3::SDL3>
         $<TARGET_FILE_DIR:FallingSand>
         COMMENT "Copying SDL3.dll to output directory"
         VERBATIM
@@ -70,12 +93,24 @@ endif()
 
 # Debug-specific settings
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_compile_options(FallingSand PRIVATE -g -O0)
+    if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+        target_compile_options(FallingSand PRIVATE -g -O0)
+    endif()
     target_compile_definitions(FallingSand PRIVATE DEBUG=1)
 endif()
+
+add_custom_command(
+	TARGET ${PROJECT_NAME} POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_directory
+		${CMAKE_CURRENT_SOURCE_DIR}/assets
+		${CMAKE_CURRENT_BINARY_DIR}/assets
+)
 
 # Print build information
 message(STATUS "FallingSand build configuration:")
 message(STATUS "  Build type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "  C Compiler: ${CMAKE_C_COMPILER_ID} ${CMAKE_C_COMPILER_VERSION}")
-message(STATUS "  Using vendored SDL: ${FALLINGSAND_VENDORED}")
+message(STATUS "  Using FetchContent for dependencies:")
+message(STATUS "    SDL3 version: release-3.2.4")
+message(STATUS "    SDL3_ttf version: release-3.2.2")
+message(STATUS "    Clay UI: latest from main branch")
