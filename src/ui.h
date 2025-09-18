@@ -4,8 +4,10 @@
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
 #include "../vendor/clay/clay.h"
+#include "game.h"
 
 Clay_RenderCommandArray create_game_scene_layout(SDL_Texture *game_tex,
-                                                 Clay_ElementData *game_element);
+                                                 Clay_ElementData *game_element,
+                                               Material *brush_state);
 
 #endif // UI_H

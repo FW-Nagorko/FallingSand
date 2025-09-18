@@ -3,6 +3,7 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 #include <SDL3_ttf/SDL_ttf.h>
+#include <unistd.h>
 
 // Clay includes
 #define CLAY_IMPLEMENTATION
@@ -32,17 +33,17 @@ Clay_Vector2 translate_screen_to_game(Clay_Vector2 screen_pos, Clay_ElementData 
                                       int width, int height)
 {
     if (!game_element->found) {
-        return (Clay_Vector2) {-1, -1};
+        return (Clay_Vector2){-1, -1};
     }
     float relative_x = screen_pos.x - game_element->boundingBox.x;
     float relative_y = screen_pos.y - game_element->boundingBox.y;
     if (relative_x < 0 || relative_x >= game_element->boundingBox.width || relative_y < 0 ||
         relative_y >= game_element->boundingBox.height) {
-        return (Clay_Vector2) {-1, -1};
+        return (Clay_Vector2){-1, -1};
     }
     float game_x = (relative_x / game_element->boundingBox.width) * width;
     float game_y = (relative_y / game_element->boundingBox.height) * height;
-    return (Clay_Vector2) {game_x, game_y};
+    return (Clay_Vector2){game_x, game_y};
 }
 
 static inline Clay_Dimensions SDL_MeasureText(Clay_StringSlice text, Clay_TextElementConfig *config,
@@ -57,7 +58,7 @@ static inline Clay_Dimensions SDL_MeasureText(Clay_StringSlice text, Clay_TextEl
         SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to measure text: %s", SDL_GetError());
     }
 
-    return (Clay_Dimensions) {(float) width, (float) height};
+    return (Clay_Dimensions){(float) width, (float) height};
 }
 
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
@@ -95,8 +96,8 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     uint64_t arena_size = Clay_MinMemorySize();
     Clay_Arena arena = Clay_CreateArenaWithCapacityAndMemory(arena_size, SDL_malloc(arena_size));
 
-    Clay_Initialize(arena, (Clay_Dimensions) {800, 600},
-                    (Clay_ErrorHandler) {.errorHandlerFunction = NULL, .userData = NULL});
+    Clay_Initialize(arena, (Clay_Dimensions){800, 600},
+                    (Clay_ErrorHandler){.errorHandlerFunction = NULL, .userData = NULL});
 
     if (!TTF_Init()) {
         SDL_Log("Failed to initialize TTF: %s", SDL_GetError());
@@ -112,7 +113,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     }
 
     state->clay_renderer.fonts = SDL_calloc(2, sizeof(TTF_Font *));
-    state->clay_renderer.fonts[0] = TTF_OpenFont("assets/VCR_OSD_MONO.ttf", 1.0f);
+    state->clay_renderer.fonts[0] = TTF_OpenFont("assets/VCR_OSD_MONO.ttf", 20.0f);
     state->clay_renderer.fonts[1] = TTF_OpenFont("assets/ka1.ttf", 16.0f);
 
     if (!state->clay_renderer.fonts[0] || !state->clay_renderer.fonts[1]) {
@@ -152,7 +153,7 @@ SDL_AppResult SDL_AppIterate(void *appstate)
     state->last_update = now;
 
     Clay_RenderCommandArray rcommands =
-        create_game_scene_layout(state->game_tex, &state->game_element);
+        create_game_scene_layout(state->game_tex, &state->game_element, &state->brush);
 
     SDL_Clay_RenderClayCommands(&state->clay_renderer, &rcommands);
     SDL_RenderPresent(state->renderer);
@@ -168,12 +169,12 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 
     if (event->type == SDL_EVENT_WINDOW_RESIZED) {
         Clay_SetLayoutDimensions(
-            (Clay_Dimensions) {.width = event->window.data1, .height = event->window.data2});
+            (Clay_Dimensions){.width = event->window.data1, .height = event->window.data2});
     }
 
     if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN || event->type == SDL_EVENT_MOUSE_BUTTON_UP ||
         event->type == SDL_EVENT_MOUSE_MOTION) {
-        state->mouse_pos = (Clay_Vector2) {.x = event->motion.x, .y = event->motion.y};
+        state->mouse_pos = (Clay_Vector2){.x = event->motion.x, .y = event->motion.y};
         if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN || event->type == SDL_EVENT_MOUSE_BUTTON_UP)
             state->mouse_down = event->type == SDL_EVENT_MOUSE_BUTTON_DOWN &&
                                 event->button.button == SDL_BUTTON_LEFT;
@@ -182,7 +183,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 
     if (event->type == SDL_EVENT_MOUSE_WHEEL) {
         float deltaTime = (SDL_GetTicks() - state->last_scroll_update) / 1000.0f;
-        Clay_UpdateScrollContainers(true, (Clay_Vector2) {.x = event->wheel.x, .y = event->wheel.y},
+        Clay_UpdateScrollContainers(true, (Clay_Vector2){.x = event->wheel.x, .y = event->wheel.y},
                                     deltaTime);
     }
 

@@ -9,6 +9,9 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 include(FetchContent)
 set(FETCHCONTENT_QUIET FALSE)
 
+# Set Properties
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Download SDL3
 FetchContent_Declare(
     SDL
@@ -39,6 +42,7 @@ set(SOURCES
     src/main.c
     src/rendering.c
     src/ui.c
+    vendor/Vector/Vector.c
 )
 
 # Define header files (for IDE support)
@@ -47,6 +51,7 @@ set(HEADERS
     src/rendering.h
     src/ui.h
     vendor/clay/clay.h
+    vendor/Vector/Vector.h
 )
 
 # Create the executable

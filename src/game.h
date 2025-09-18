@@ -1,6 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
 #include <stdlib.h>
+#include "../vendor/Vector/Vector.h"
 
 typedef enum { EMPTY, SAND, WATER, WALL } Material;
 
@@ -20,7 +21,7 @@ typedef struct {
 } GameState;
 
 // TODO: add loading materials from a file
-extern const MaterialProperties material_properties[];
+extern Vector(MaterialProperties) material_properties;
 
 void init_game(GameState *game, int width, int height);
 void update_game(GameState *game);
