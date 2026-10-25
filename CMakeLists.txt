@@ -5,36 +5,12 @@ project(FallingSand LANGUAGES C)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-# FetchContent setup
-include(FetchContent)
-set(FETCHCONTENT_QUIET FALSE)
+# Use SDL3 and SDL3_ttf supplied by the system or development environment.
+find_package(SDL3 CONFIG REQUIRED)
+find_package(SDL3_ttf CONFIG REQUIRED)
 
 # Set Properties
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-# Download SDL3
-FetchContent_Declare(
-    SDL
-    GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-    GIT_TAG release-3.2.4
-    GIT_SHALLOW TRUE
-    GIT_PROGRESS TRUE
-)
-message(STATUS "Fetching SDL3...")
-FetchContent_MakeAvailable(SDL)
-set_property(DIRECTORY "${sdl_SOURCE_DIR}" PROPERTY EXCLUDE_FROM_ALL TRUE)
-
-# Download SDL_ttf
-FetchContent_Declare(
-	SDL_ttf
-	GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git
-	GIT_TAG release-3.2.2
-	# GIT_SHALLOW FALSE
-	GIT_PROGRESS TRUE
-)
-message(STATUS "Using SDL_ttf via FetchContent")
-FetchContent_MakeAvailable(SDL_ttf)
-set_property(DIRECTORY "${sdl_ttf_SOURCE_DIR}" PROPERTY EXCLUDE_FROM_ALL TRUE)
 
 # Define source files
 set(SOURCES
@@ -57,8 +33,8 @@ set(HEADERS
 # Create the executable
 add_executable(FallingSand ${SOURCES} ${HEADERS})
 
-# Link to the SDL3 library
-target_link_libraries(FallingSand PRIVATE 
+# Link to the SDL3 libraries found above
+target_link_libraries(FallingSand PRIVATE
     SDL3::SDL3
     SDL3_ttf::SDL3_ttf
 )
@@ -105,17 +81,14 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 add_custom_command(
-	TARGET ${PROJECT_NAME} POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy_directory
-		${CMAKE_CURRENT_SOURCE_DIR}/assets
-		${CMAKE_CURRENT_BINARY_DIR}/assets
+    TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/assets
+        ${CMAKE_CURRENT_BINARY_DIR}/assets
 )
 
 # Print build information
 message(STATUS "FallingSand build configuration:")
 message(STATUS "  Build type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "  C Compiler: ${CMAKE_C_COMPILER_ID} ${CMAKE_C_COMPILER_VERSION}")
-message(STATUS "  Using FetchContent for dependencies:")
-message(STATUS "    SDL3 version: release-3.2.4")
-message(STATUS "    SDL3_ttf version: release-3.2.2")
-message(STATUS "    Clay UI: latest from main branch")
+message(STATUS "  Using installed SDL3 and SDL3_ttf packages")
