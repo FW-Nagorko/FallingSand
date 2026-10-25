@@ -20,7 +20,7 @@ typedef struct handler_data {
 void pick_element_button_handler(Clay_ElementId elementId, Clay_PointerData pointerInfo,
                                  intptr_t userData)
 {
-    struct handler_data *handler_data = (Material *) userData;
+    Handler *handler_data = (Handler *) userData;
     if (pointerInfo.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
         *handler_data->brush = handler_data->button_mat;
     }
