@@ -13,10 +13,17 @@ void init_game(GameState *game, int width, int height)
     game->back = (Material *) malloc(width * height * sizeof(Material));
     memset(game->front, 0, width * height * sizeof(Material));
     memset(game->back, 0, width * height * sizeof(Material));
-    vector_push_back(material_properties, (MaterialProperties){"EMPTY", SOLID, {0, 0, 0, 0}, 0});
-    vector_push_back(material_properties, (MaterialProperties){"SAND", POWDER, {194, 178, 128, 255}, 10});
-    vector_push_back(material_properties, (MaterialProperties){"WATER", LIQUID, {64, 164, 223, 255}, 5});
-    vector_push_back(material_properties, (MaterialProperties){"WALL", SOLID, {128, 128, 128, 255}, 1000});
+    vector_push_back(material_properties, (MaterialProperties) {"EMPTY", SOLID, {0, 0, 0, 0}, 0});
+    vector_push_back(material_properties,
+                     (MaterialProperties) {"SAND", POWDER, {194, 178, 128, 255}, 10});
+    vector_push_back(material_properties,
+                     (MaterialProperties) {"DIRT", POWDER, {165, 42, 42, 255}, 15});
+    vector_push_back(material_properties,
+                     (MaterialProperties) {"WATER", LIQUID, {64, 164, 223, 255}, 5});
+    vector_push_back(material_properties,
+                     (MaterialProperties) {"OIL", LIQUID, {80, 80, 80, 255}, 7});
+    vector_push_back(material_properties,
+                     (MaterialProperties) {"WALL", SOLID, {128, 128, 128, 255}, 1000});
 }
 
 void swap_buffers(GameState *game);
