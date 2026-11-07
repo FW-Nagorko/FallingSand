@@ -2,11 +2,10 @@
 #define GAME_H
 #include "../vendor/Vector/Vector.h"
 
-#define EMPTY 0
 #define SAND  1
 typedef char Material;
 
-typedef enum { SOLID, LIQUID, POWDER } MaterialType;
+typedef enum { EMPTY, SOLID, LIQUID, POWDER } MaterialType;
 
 typedef struct {
     char name[16];
@@ -16,14 +15,23 @@ typedef struct {
 } MaterialProperties;
 
 typedef struct {
+    int input_a;
+    int input_b;
+    int output_a;
+    int output_b;
+    float probability;
+} MaterialReactions;
+
+typedef struct {
     int width, height;
-    Material *front;
-    Material *back;
+    Material *world;
     int reverse_x;
+    size_t tick;
 } GameState;
 
 // TODO: add loading materials from a file
 extern Vector(MaterialProperties) material_properties;
+extern Vector(MaterialReactions) material_reactions;
 
 void init_game(GameState *game, int width, int height);
 void update_game(GameState *game);

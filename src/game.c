@@ -2,6 +2,8 @@
 #include <memory.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
+#include <stdio.h>
 
 Vector(MaterialProperties) material_properties = NULL;
 
@@ -9,11 +11,11 @@ void init_game(GameState *game, int width, int height)
 {
     game->width = width;
     game->height = height;
-    game->front = (Material *) malloc(width * height * sizeof(Material));
-    game->back = (Material *) malloc(width * height * sizeof(Material));
-    memset(game->front, 0, width * height * sizeof(Material));
-    memset(game->back, 0, width * height * sizeof(Material));
-    vector_push_back(material_properties, (MaterialProperties) {"EMPTY", SOLID, {0, 0, 0, 0}, 0});
+    game->reverse_x = 0;
+    game->world = (Material *) malloc(width * height * sizeof(Material));
+    game->tick = 0;
+    memset(game->world, 0, width * height * sizeof(Material));
+    vector_push_back(material_properties, (MaterialProperties) {"EMPTY", LIQUID, {0, 0, 0, 0}, 0});
     vector_push_back(material_properties,
                      (MaterialProperties) {"SAND", POWDER, {194, 178, 128, 255}, 10});
     vector_push_back(material_properties,
@@ -26,106 +28,100 @@ void init_game(GameState *game, int width, int height)
                      (MaterialProperties) {"WALL", SOLID, {128, 128, 128, 255}, 1000});
 }
 
-void swap_buffers(GameState *game);
-void set_back_pixel(GameState *game, int x, int y, Material mat)
+
+static inline bool displaces(Material a, Material b)
 {
-    if (x >= 0 && x < game->width && y >= 0 && y < game->height) {
-        game->back[y * game->width + x] = mat;
-    }
+    return material_properties[b].type != SOLID &&
+           material_properties[a].type != SOLID &&
+           material_properties[a].mass > material_properties[b].mass;
 }
 
-Material get_back_pixel(GameState *game, int x, int y)
+static inline void swp(Material *restrict a, Material *restrict b)
 {
-    if (x >= 0 && x < game->width && y >= 0 && y < game->height) {
-        return game->back[y * game->width + x];
-    }
-    Material empty = {0};
-    return empty;
+    Material t = *a;
+    *a = *b;
+    *b = t;
 }
 
-bool attempt_move(GameState *game, int x1, int y1, int x2, int y2)
+static inline bool is_powder(Material m) { return material_properties[m].type == POWDER; }
+static inline bool is_solid(Material m) { return material_properties[m].type == SOLID; }
+static inline bool is_liquid(Material m) { return material_properties[m].type == LIQUID; }
+
+static inline void move_particles(Material *tl, Material *tr, Material *bl, Material *br)
 {
-    Material from = get_pixel(game, x1, y1);
-    Material to = get_pixel(game, x2, y2);
-    Material to_back = get_back_pixel(game, x2, y2);
-    int from_mass = material_properties[from].mass;
-    int to_mass = material_properties[to].mass;
-    int to_back_mass = material_properties[to_back].mass;
+    
+            // 1. pionowo
+            if (displaces(*tl, *bl))
+                swp(tl, bl);
+            if (displaces(*tr, *br))
+                swp(tr, br);
 
-    if (from_mass > to_mass && from_mass > to_back_mass) {
-        set_back_pixel(game, x1, y1, to);
-        set_pixel(game, x1, y1, EMPTY);
-        set_back_pixel(game, x2, y2, from);
-        set_pixel(game, x2, y2, EMPTY);
-        return true;
-    }
-    return false;
-}
-
-void move_material(GameState *game, int x, int y)
-{
-    Material mat = get_pixel(game, x, y);
-
-    if (material_properties[mat].type == SOLID) {
-        set_back_pixel(game, x, y, mat);
-        return;
-    }
-
-    if (attempt_move(game, x, y, x, y + 1)) {
-        return;
-    }
-
-    int x_dir = (rand() % 2) ? 1 : -1;
-    int y_dir = material_properties[mat].type == LIQUID ? 0 : 1;
-    if (attempt_move(game, x, y, x + x_dir, y + y_dir)) {
-        return;
-    }
-
-    if (attempt_move(game, x, y, x - x_dir, y + y_dir)) {
-        return;
-    }
-    set_back_pixel(game, x, y, mat);
-}
-
-void update_game(GameState *game)
-{
-    for (int y = 0; y < game->height; y++) {
-        for (int x = 0; x < game->width; x++) {
-            Material mat = get_pixel(game, x, y);
-            if (mat != EMPTY) {
-                move_material(game, x, y);
+            // 2. po przekątnej (proszki, gdy ruch w dół zablokowany)
+            if (rand() & 1) {
+                if (is_powder(*tl) && !displaces(*tl, *bl) && displaces(*tl, *br))
+                    swp(tl, br);
+                else if (is_powder(*tr) && !displaces(*tr, *br) && displaces(*tr, *bl))
+                    swp(tr, bl);
+            } else {
+                if (is_powder(*tr) && !displaces(*tr, *br) && displaces(*tr, *bl))
+                    swp(tr, bl);
+                else if (is_powder(*tl) && !displaces(*tl, *bl) && displaces(*tl, *br))
+                    swp(tl, br);
             }
+
+            // 3. poziomo (ciecze)
+            if ((is_liquid(*bl) || is_liquid(*br)) && (rand() % 3) <= 1) {
+                if (is_liquid(*bl) && displaces(*bl, *br))
+                    swp(bl, br);
+                else if (is_liquid(*br) && displaces(*br, *bl))
+                    swp(bl, br);
+            }
+            if ((is_liquid(*tl) || is_liquid(*tr)) && (rand() % 3) <= 1) {
+                if (is_liquid(*tl) && displaces(*tl, *tr))
+                    swp(tl, tr);
+                else if (is_liquid(*tr) && displaces(*tr, *tl))
+                    swp(tl, tr);
+            }
+}
+
+static inline void react_particles(Material *tl, Material *tr, Material *bl, Material *br)
+{
+    
+}
+
+void update_game(GameState *g)
+{
+    int w = g->width;
+    int h = g->height;
+    int off = g->tick++ & 1;
+
+    for (int y = off; y + 1 < h; y += 2) {
+        for (int x = off; x + 1 < w; x += 2) {
+            Material *tl = &g->world[y * w + x], *tr = tl + 1;
+            Material *bl = tl + w, *br = bl + 1;
+            move_particles(tl, tr, bl, br);
+            react_particles(tl, tr, bl, br);
         }
     }
-    swap_buffers(game);
-    memset(game->back, 0, game->width * game->height * sizeof(Material));
 }
 
 void set_pixel(GameState *game, int x, int y, Material mat)
 {
     if (x >= 0 && x < game->width && y >= 0 && y < game->height) {
-        game->front[y * game->width + x] = mat;
+        game->world[y * game->width + x] = mat;
     }
-}
-
-void swap_buffers(GameState *game)
-{
-    Material *temp = game->front;
-    game->front = game->back;
-    game->back = temp;
 }
 
 Material get_pixel(const GameState *game, int x, int y)
 {
     if (x >= 0 && x < game->width && y >= 0 && y < game->height) {
-        return game->front[y * game->width + x];
+        return game->world[y * game->width + x];
     }
-    Material empty = {0};
-    return empty;
+    return EMPTY;
 }
 
 void free_game(GameState *game)
 {
-    free(game->front);
+    free(game->world);
     vector_free(material_properties);
 }
