@@ -21,7 +21,7 @@ typedef struct _vector_metadata {
     size_t capacity;
 } vector_metadata_t;
 
-#define _vector_metadata(vec) ((vec) ? ((vector_metadata_t*)((char*)(vec) - sizeof(vector_metadata_t))) : NULL)
+#define _vector_metadata(vec) ((vec) ? ((vector_metadata_t*)(vec) - 1) : NULL)
 
 #define Vector_generic void*
 #define Vector(type) type*
@@ -60,6 +60,14 @@ typedef struct _vector_metadata {
             } \
         } \
     } while(0)
+/// @brief Ensures that vector_size of vec is at least size
+/// @param vec The vector.
+/// @param size The target size.
+#define vector_resize(vec, size) do{ \
+    if(vector_size(vec) < (size)){ \
+        (vec) = _grow((vec), sizeof(*(vec)), (size)); \
+    } \
+} while(0)
 
 /// @brief Removes an element from the vector at the specified index.
 /// @param vec The vector.
