@@ -42,7 +42,7 @@
 
       devShells = forAllSystems (pkgs: {
         default = pkgs.mkShell {
-          packages = [ pkgs.cmake pkgs.pkg-config pkgs.sdl3 pkgs.sdl3-ttf pkgs.sdl3-image];
+          packages = [ pkgs.cmake pkgs.clang-tools pkgs.pkg-config pkgs.sdl3 pkgs.sdl3-ttf pkgs.sdl3-image];
         };
       });
     };
