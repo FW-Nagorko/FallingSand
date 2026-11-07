@@ -1,9 +1,10 @@
 #ifndef GAME_H
 #define GAME_H
-#include <stdlib.h>
 #include "../vendor/Vector/Vector.h"
 
-typedef enum { EMPTY, SAND, WATER, WALL } Material;
+#define EMPTY 0
+#define SAND  1
+typedef char Material;
 
 typedef enum { SOLID, LIQUID, POWDER } MaterialType;
 
@@ -18,6 +19,7 @@ typedef struct {
     int width, height;
     Material *front;
     Material *back;
+    int reverse_x;
 } GameState;
 
 // TODO: add loading materials from a file
