@@ -25,6 +25,8 @@ void init_game(GameState *game, int width, int height)
     vector_push_back(material_properties,
                      (MaterialProperties) {"OIL", LIQUID, {80, 80, 80, 255}, 7});
     vector_push_back(material_properties,
+                     (MaterialProperties) {"STEAM", LIQUID, {94, 194, 253, 255}, -5});
+    vector_push_back(material_properties,
                      (MaterialProperties) {"WALL", SOLID, {128, 128, 128, 255}, 1000});
 }
 
