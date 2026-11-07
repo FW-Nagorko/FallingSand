@@ -111,7 +111,7 @@ Clay_RenderCommandArray create_game_scene_layout(SDL_Texture *game_tex,
             CLAY({.id = CLAY_ID("game_texture"),
                   .layout =
                       {
-                          .sizing = {CLAY_SIZING_GROW(100), CLAY_SIZING_GROW(100)},
+                          .sizing = {CLAY_SIZING_PERCENT(0.75f), CLAY_SIZING_GROW(0)},
                       },
                   .backgroundColor = {0, 0, 0, 255},
                   .image = {.imageData = game_tex},
@@ -119,7 +119,7 @@ Clay_RenderCommandArray create_game_scene_layout(SDL_Texture *game_tex,
             CLAY({.id = CLAY_ID("MaterialPicker"),
                   .layout =
                       {
-                          .sizing = {CLAY_SIZING_GROW(150), CLAY_SIZING_GROW(100)},
+                          .sizing = {CLAY_SIZING_PERCENT(0.25f), CLAY_SIZING_GROW(100)},
                           .padding = CLAY_PADDING_ALL(10),
                           .layoutDirection = CLAY_TOP_TO_BOTTOM,
                           .childGap = 10,
