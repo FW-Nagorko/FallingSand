@@ -61,7 +61,7 @@ target_include_directories(FallingSand PRIVATE src)
 
 # Set compiler warnings
 if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
-    target_compile_options(FallingSand PRIVATE -Wall -Wextra -Wpedantic)
+    target_compile_options(FallingSand PRIVATE -Wall -Wextra -Wpedantic -O3)
 elseif(CMAKE_C_COMPILER_ID MATCHES "MSVC")
     target_compile_options(FallingSand PRIVATE /W4)
 endif()
