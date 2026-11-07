@@ -194,6 +194,9 @@ void SDL_AppQuit(void *appstate, SDL_AppResult result)
 {
     SDL_AppState *state = (SDL_AppState *) appstate;
     if (state) {
+        if (state->game_tex) {
+            SDL_DestroyTexture(state->game_tex);
+        }
         if (state->renderer) {
             SDL_DestroyRenderer(state->renderer);
         }
@@ -201,9 +204,6 @@ void SDL_AppQuit(void *appstate, SDL_AppResult result)
             SDL_DestroyWindow(state->window);
         }
         SDL_free(state);
-        if (state->game_tex) {
-            SDL_DestroyTexture(state->game_tex);
-        }
         free_game(&state->game);
         if (state->clay_renderer.fonts) {
             TTF_CloseFont(state->clay_renderer.fonts[0]);
