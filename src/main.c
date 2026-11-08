@@ -123,7 +123,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 
     Clay_SetMeasureTextFunction(SDL_MeasureText, state->clay_renderer.fonts);
 
-    state->brush = SAND;
+    state->brush = 1; // assumes this is sand
     state->last_update = SDL_GetTicks();
     *appstate = state;
     return SDL_APP_CONTINUE;

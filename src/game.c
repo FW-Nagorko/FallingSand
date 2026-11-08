@@ -6,6 +6,14 @@
 #include <stdio.h>
 
 Vector(MaterialProperties) material_properties = NULL;
+Vector(MaterialReaction) material_reactions = NULL;
+
+Material get_material_by_name(const char* name) {
+    for_vector(material_properties, mat){
+        if(strcmp(material_properties[mat].name, name) == 0) return mat;
+    }
+    return MAT_EMPTY;
+}
 
 void init_game(GameState *game, int width, int height)
 {
@@ -27,9 +35,21 @@ void init_game(GameState *game, int width, int height)
     vector_push_back(material_properties,
                      (MaterialProperties) {"STEAM", LIQUID, {94, 194, 253, 255}, -5});
     vector_push_back(material_properties,
+                     (MaterialProperties) {"FIRE", LIQUID, {253, 94, 94, 255}, -6});
+    vector_push_back(material_properties,
                      (MaterialProperties) {"WALL", SOLID, {128, 128, 128, 255}, 1000});
-}
 
+    vector_push_back(material_reactions,
+                    (MaterialReaction) {{get_material_by_name("STEAM"), MAT_ANY}, {get_material_by_name("WATER"), MAT_ANY}, 0.01});
+    vector_push_back(material_reactions,
+                    (MaterialReaction) {{get_material_by_name("FIRE"), MAT_ANY}, {get_material_by_name("EMPTY"), MAT_ANY}, 0.05});
+    vector_push_back(material_reactions,
+                    (MaterialReaction) {{get_material_by_name("WATER"), get_material_by_name("SAND"), MAT_ANY, MAT_ANY}, {get_material_by_name("DIRT"), MAT_ANY, MAT_ANY, MAT_ANY}, 0.1});
+    vector_push_back(material_reactions,
+                    (MaterialReaction) {{get_material_by_name("OIL"), get_material_by_name("FIRE"), MAT_ANY, MAT_ANY}, {get_material_by_name("FIRE"), get_material_by_name("FIRE"), MAT_ANY, MAT_ANY}, 0.5});
+    vector_push_back(material_reactions,
+                    (MaterialReaction) {{get_material_by_name("WATER"), get_material_by_name("FIRE"), MAT_ANY, MAT_ANY}, {get_material_by_name("STEAM"), MAT_ANY, MAT_ANY, MAT_ANY}, 0.8});
+}
 
 static inline bool displaces(Material a, Material b)
 {
@@ -86,9 +106,41 @@ static inline void move_particles(Material *tl, Material *tr, Material *bl, Mate
             }
 }
 
-static inline void react_particles(Material *tl, Material *tr, Material *bl, Material *br)
+
+static inline bool match_reaction(Material *const c[4], const MaterialReaction *r, int slot[4])
 {
-    
+    unsigned char taken = 0;
+    for (int i = 0; i < 4; i++) {
+        int found = -1;
+        for (int j = 0; j < 4; j++) {
+            if (taken >> j & 1) continue;
+            if (r->inputs[j] == *c[i] || r->inputs[j] == MAT_ANY) { found = j; break; }
+        }
+        if (found < 0) return false;
+        taken |= 1u << found;
+        slot[i] = found;
+    }
+    return true;
+}
+
+static inline bool react_particles(Material *tl, Material *tr, Material *bl, Material *br)
+{
+    Material *c[4] = { tl, tr, bl, br };
+    int slot[4];
+
+    for_vector(material_reactions, idx) {
+        const MaterialReaction *r = &material_reactions[idx];
+
+        if (!match_reaction(c, r, slot)) continue;
+        if ((float)rand() / (float)RAND_MAX >= r->probability) continue;
+
+        for (int i = 0; i < 4; i++) {
+            Material out = r->outputs[slot[i]];
+            if (out != MAT_ANY) *c[i] = out;
+        }
+        return true;
+    }
+    return false;
 }
 
 void update_game(GameState *g)
@@ -101,8 +153,8 @@ void update_game(GameState *g)
         for (int x = off; x + 1 < w; x += 2) {
             Material *tl = &g->world[y * w + x], *tr = tl + 1;
             Material *bl = tl + w, *br = bl + 1;
-            move_particles(tl, tr, bl, br);
-            react_particles(tl, tr, bl, br);
+            if(!react_particles(tl, tr, bl, br))
+                move_particles(tl, tr, bl, br);
         }
     }
 }
